@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "game-design-theory": {
+      "source": "pluginagentmarketplace/custom-plugin-game-developer",
+      "sourceType": "github",
+      "skillPath": "skills/game-design-theory/SKILL.md",
+      "computedHash": "60a7ad8dd95255ed22840e03d44fdee8be919a19471f723d509da7c43b7bf21b"
+    }
+  }
+}
