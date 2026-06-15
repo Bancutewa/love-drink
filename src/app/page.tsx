@@ -11,14 +11,15 @@ import {
   Unlock, 
   Volume2, 
   VolumeX, 
-  User, 
-  Plus, 
-  Trash2, 
-  ChevronRight, 
+  User,
+  Plus,
+  Trash2,
+  ChevronRight,
   Wine,
   Settings as SettingsIcon,
   Check,
-  Home as HomeIcon
+  Home as HomeIcon,
+  Eye
 } from "lucide-react";
 import { gameData, Card } from "./data";
 
@@ -102,7 +103,7 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   
   // Game screens
-  const [screen, setScreen] = useState<"setup" | "playing" | "settings" | "how-to-play">("setup");
+  const [screen, setScreen] = useState<"setup" | "playing" | "settings" | "how-to-play" | "wish-input">("setup");
   const [p1Name, setP1Name] = useState("Anh");
   const [p2Name, setP2Name] = useState("Em");
   const [turn, setTurn] = useState(true); // true = P1, false = P2
@@ -118,6 +119,8 @@ export default function Home() {
   const [p2Wishes, setP2Wishes] = useState<string[]>(["", "", ""]);
   const [showP1Wishes, setShowP1Wishes] = useState(false);
   const [showP2Wishes, setShowP2Wishes] = useState(false);
+  const [activeWishTab, setActiveWishTab] = useState<1 | 2>(2);
+  const [showWishFields, setShowWishFields] = useState<boolean[]>([false, false, false]);
   
   // Active playing card state
   const [currentCard, setCurrentCard] = useState<Card | null>(null);
@@ -515,77 +518,119 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Secret Wishlists Accordions */}
-            <div className="wish-accordion-list">
-              
-              <div className="accordion">
-                <button 
-                  onClick={() => { playClickSound(); setShowP1Wishes(!showP1Wishes); }} 
-                  className="accordion-header"
-                >
-                  <span>🔒 Ước nguyện thầm kín của {p1Name}</span>
-                  <ChevronRight size={14} style={{ transform: showP1Wishes ? "rotate(90deg)" : "none", transition: "transform 0.2s" }} />
-                </button>
-                {showP1Wishes && (
-                  <div className="accordion-content">
-                    <p className="accordion-desc">
-                      * Nhập 3 ước nguyện/khao khát của bạn. Trò chơi sẽ che chúng lại và chỉ mở khóa ngẫu nhiên khi nhiệt độ cuộc chơi tăng cao.
-                    </p>
-                    {p1Wishes.map((w, idx) => (
-                      <input 
-                        key={idx}
-                        type="password"
-                        value={w}
-                        onChange={(e) => {
-                          const updated = [...p1Wishes];
-                          updated[idx] = e.target.value;
-                          setP1Wishes(updated);
-                        }}
-                        placeholder={`Điều nguyện ước ${idx + 1}`}
-                        className="input-field"
-                        style={{ padding: "8px 12px", fontSize: "12px" }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="accordion">
-                <button 
-                  onClick={() => { playClickSound(); setShowP2Wishes(!showP2Wishes); }} 
-                  className="accordion-header"
-                >
-                  <span>🔒 Ước nguyện thầm kín của {p2Name}</span>
-                  <ChevronRight size={14} style={{ transform: showP2Wishes ? "rotate(90deg)" : "none", transition: "transform 0.2s" }} />
-                </button>
-                {showP2Wishes && (
-                  <div className="accordion-content">
-                    <p className="accordion-desc">
-                      * Nhập 3 ước nguyện/khao khát của bạn. Trò chơi sẽ che chúng lại và chỉ mở khóa ngẫu nhiên khi nhiệt độ cuộc chơi tăng cao.
-                    </p>
-                    {p2Wishes.map((w, idx) => (
-                      <input 
-                        key={idx}
-                        type="password"
-                        value={w}
-                        onChange={(e) => {
-                          const updated = [...p2Wishes];
-                          updated[idx] = e.target.value;
-                          setP2Wishes(updated);
-                        }}
-                        placeholder={`Điều nguyện ước ${idx + 1}`}
-                        className="input-field"
-                        style={{ padding: "8px 12px", fontSize: "12px" }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-
+            {/* Secret Wishlists Entry Button */}
+            <div className="mood-section" style={{ marginTop: '12px' }}>
+              <label className="input-label">Bí Mật Của Hai Người</label>
+              <button 
+                onClick={() => { playClickSound(); setScreen("wish-input"); setActiveWishTab(2); setShowWishFields([false, false, false]); }} 
+                className="btn-core secondary"
+                style={{ display: "flex", gap: "8px", justifyContent: "center" }}
+              >
+                <Lock size={16} className="score-value gold" /> Nhập Ước Nguyện Thầm Kín
+              </button>
             </div>
 
             <button onClick={handleStartGame} className="btn-core primary" style={{ marginTop: "8px" }}>
               {history.length > 0 ? "Tiếp Tục Cuộc Chơi" : "Bắt Đầu Cuộc Chơi"} <ChevronRight size={16} />
+            </button>
+          </div>
+        )}
+
+        {/* WISH INPUT MODAL */}
+        {screen === "wish-input" && (
+          <div className="glass-panel settings-panel">
+            <div className="settings-header">
+              <h2 className="settings-title">
+                <Lock size={18} className="score-value gold" /> Hộp Ước Nguyện
+              </h2>
+              <button onClick={() => { playClickSound(); setScreen("setup"); }} className="settings-close-btn">
+                Xong
+              </button>
+            </div>
+            
+            <div style={{ padding: "10px 0", fontSize: "13px", color: "rgba(255,255,255,0.8)" }}>
+              Vui lòng đưa máy cho người có tên dưới đây để nhập bí mật nhé!
+            </div>
+
+            <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+              <button 
+                onClick={() => { playClickSound(); setActiveWishTab(2); setShowWishFields([false, false, false]); }}
+                className={`btn-core ${activeWishTab === 2 ? "primary" : "secondary"}`}
+                style={{ flex: 1, padding: "8px" }}
+              >
+                {p2Name} nhập
+              </button>
+              <button 
+                onClick={() => { playClickSound(); setActiveWishTab(1); setShowWishFields([false, false, false]); }}
+                className={`btn-core ${activeWishTab === 1 ? "primary" : "secondary"}`}
+                style={{ flex: 1, padding: "8px" }}
+              >
+                {p1Name} nhập
+              </button>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {(activeWishTab === 1 ? p1Wishes : p2Wishes).map((w, idx) => (
+                <div key={idx} style={{ position: "relative" }}>
+                  <input 
+                    type={showWishFields[idx] ? "text" : "password"}
+                    value={w}
+                    onChange={(e) => {
+                      if (activeWishTab === 1) {
+                        const updated = [...p1Wishes];
+                        updated[idx] = e.target.value;
+                        setP1Wishes(updated);
+                      } else {
+                        const updated = [...p2Wishes];
+                        updated[idx] = e.target.value;
+                        setP2Wishes(updated);
+                      }
+                    }}
+                    placeholder={`Điều ước số ${idx + 1}...`}
+                    className="input-field"
+                    style={{ paddingRight: "40px" }}
+                  />
+                  <button
+                    onClick={() => {
+                      const updated = [...showWishFields];
+                      updated[idx] = !updated[idx];
+                      setShowWishFields(updated);
+                    }}
+                    style={{
+                      position: "absolute",
+                      right: "10px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      color: "var(--text-muted)",
+                      cursor: "pointer",
+                      padding: "4px"
+                    }}
+                  >
+                    {showWishFields[idx] ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button 
+              onClick={() => {
+                playClickSound();
+                if (activeWishTab === 2) {
+                  // Switch to P1
+                  setActiveWishTab(1);
+                  setShowWishFields([false, false, false]);
+                  alert(`Tuyệt vời! Bây giờ hãy đưa máy lại cho ${p1Name} nhé.`);
+                } else {
+                  // Done
+                  setScreen("setup");
+                }
+              }}
+              className="btn-core primary"
+              style={{ marginTop: "16px" }}
+            >
+              {activeWishTab === 2 ? `Xong phần của ${p2Name} & Đưa máy cho ${p1Name}` : "Hoàn tất & Lưu lại"}
             </button>
           </div>
         )}
